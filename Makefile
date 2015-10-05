@@ -18,7 +18,7 @@ travis_kernels:
 	@echo "Building kernel..."
 
 	$(eval KERNEL := $(shell echo "$(URI)" | sed 's@github.com/scaleway/kernel-tools/@@'))
-	test -d kernel-tools || git clone --single-branch git@github.com:scaleway/kernel-tools.git
+	test -d kernel-tools || git clone --single-branch https://github.com/scaleway/kernel-tools
 	make -C kernel-tools KERNEL="$(KERNEL)" build
 
 .PHONY: travis_images
