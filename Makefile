@@ -17,8 +17,9 @@ travis_kernels:
 	@test -n "$(REVISION)" || (echo "Error: REVISION is missing"; exit 1)
 	@echo "Building kernel..."
 
-	@echo "Error: Not yet implemented"; exit 1
-
+	$(eval KERNEL := $(shell echo "$(URI)" | sed 's@github.com/scaleway/kernel-tools/@@'))
+	test -d kernel-tools || git clone --single-branch git@github.com:scaleway/kernel-tools.git
+	make -C kernel-tools KERNEL="$(KERNEL)" build
 
 .PHONY: travis_images
 travis_images:
