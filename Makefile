@@ -19,7 +19,7 @@ travis_kernels:
 
 	$(eval KERNEL := $(shell echo "$(URI)" | sed 's@github.com/scaleway/kernel-tools/@@'))
 	test -d kernel-tools || git clone --single-branch https://github.com/scaleway/kernel-tools
-	make -C kernel-tools KERNEL="$(KERNEL)" build
+	cd kernel-tools; make KERNEL="$(KERNEL)" build
 
 .PHONY: travis_images
 travis_images:
