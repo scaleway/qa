@@ -5,5 +5,8 @@ sudo: required
 services:
 - docker
 
+install:
+- wget https://github.com/scaleway/scaleway-cli/releases/download/v1.5.0/scw_1.5.0_amd64.deb && sudo dpkg -i scw*.deb && rm -f scw*.deb && scw version
+
 script:
 - make travis
