@@ -69,6 +69,12 @@ travis_images: scw_login
 	@echo "[+] Building the image"
 	scw exec image-builder 'cd $(REPONAME); make build'
 
+	# FIXME: push on docker hub
+
+	# FIXME: push on store
+
+	# FIXME: create image
+
 	@echo "[+] Cleaning up..."
 	(scw stop -t qa-image-builder & scw rm -f qa-image-builder & wait `jobs -p` || true) 2>/dev/null
 
