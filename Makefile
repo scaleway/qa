@@ -46,7 +46,7 @@ travis_images: scw_login
 	$(eval SUBDIR := $(shell echo $(URI) | cut -d/ -f4-))
 
 	@echo "[+] Flushing cache..."
-	touch ~/.scw-cache.db; scw _flush-cache
+	test -f ~/.scw-cache.db && scw _flush-cache || true
 
 	@echo "[+] Cleaning old builder if any..."
 	(scw stop -t qa-image-builder & scw rm -f qa-image-builder & wait `jobs -p` || true) 2>/dev/null
