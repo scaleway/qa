@@ -52,7 +52,7 @@ travis_images: scw_login
 	(scw stop -t qa-image-builder & scw rm -f qa-image-builder & wait `jobs -p` || true) 2>/dev/null
 
 	@echo "[+] Spawning a new builder..."
-	scw run -d --name=qa-image-builder image-builder
+	scw run --detach --tmp-ssh-key --name=qa-image-builder image-builder
 
 	@echo "[+] Waiting for server to be available..."
 	scw exec -w -T=300 image-builder uptime
