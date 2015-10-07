@@ -7,6 +7,7 @@ services:
 
 install:
 - wget https://github.com/scaleway/scaleway-cli/releases/download/v1.5.0/scw_1.5.0_amd64.deb && sudo dpkg -i scw*.deb && rm -f scw*.deb && scw version
+- go get github.com/moul/anonuuid/...
 
 script:
 - make travis

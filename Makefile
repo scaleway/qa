@@ -40,11 +40,13 @@ travis_kernels:
 travis_images: scw_login
 	@test -n "$(URI)" || (echo "Error: URI is missing"; exit 1)
 	@test -n "$(REVISION)" || (echo "Error: REVISION is missing"; exit 1)
-	@echo "[+] Building image..."
 
 	$(eval REPONAME := $(shell echo $(URI) | cut -d/ -f3))
 	$(eval REPOURL := $(shell echo $(URI) | cut -d/ -f1-3))
 	$(eval SUBDIR := $(shell echo $(URI) | cut -d/ -f4-))
+
+	@echo "[+] Flushing cache..."
+	scw _flush-cache
 
 	@echo "[+] Cleaning old builder if any..."
 	(scw stop -t qa-image-builder & scw rm -f qa-image-builder & wait `jobs -p` || true) 2>/dev/null
@@ -56,13 +58,13 @@ travis_images: scw_login
 	scw exec -w -T=300 image-builder uptime
 
 	@echo "[+] Getting information about the server..."
-	scw inspect server:image-builder
+	scw inspect server:image-builder | anonuuid
 
 	@echo "[+] Logging in"
-	@scw exec image-builder scw login --organization=$TRAVIS_SCALEWAY_ORGANIZATION --token=$TRAVIS_SCALEWAY_TOKEN -s
+	@scw exec image-builder scw login --organization=$(shell cat ~/.scwrc | jq .organization) --token=$(shell cat ~/.scwrc | jq .token) -s
 
 	@echo "[+] Fetching the image sources"
-	scw exec image-builder git clone --single-branch https://$(REPOURL))
+	scw exec image-builder git clone --single-branch https://$(REPOURL)
 
 	@echo "[+] Building the image"
 	scw exec image-builder 'cd $(REPONAME); make build'
