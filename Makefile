@@ -72,16 +72,22 @@ travis_images: scw_login
 	@echo "[+] Getting information about the server..."
 	scw inspect server:image-builder | anonuuid
 
-	@echo "[+] Logging in"
+	@echo "[+] Logging in to Docker hub..."
+	@scw exec image-builder docker login -e="$(TRAVIS_DOCKER_LOGIN)" -u="$(TRAVIS_DOCKER_USER)" -p="$(TRAVIS_DOCKER_PASSWORD)"
+	scw exec image-builder docker version
+	scw exec image-builder docker info
+
+	@echo "[+] Logging in to scw..."
 	@scw exec image-builder scw login --organization=$(shell cat ~/.scwrc | jq .organization) --token=$(shell cat ~/.scwrc | jq .token) -s
 
-	@echo "[+] Fetching the image sources"
+	@echo "[+] Fetching the image sources..."
 	scw exec image-builder git clone --single-branch https://$(REPOURL)
 
-	@echo "[+] Building the image"
+	@echo "[+] Building the image..."
 	scw exec image-builder 'cd $(REPONAME); make build'
 
-	# FIXME: push on docker hub
+	@echo "[+] Releasing image on docker hub..."
+	scw exec image-builder 'cd $(REPONAME); make release'
 
 	# FIXME: push on store
 
