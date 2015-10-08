@@ -61,7 +61,7 @@ travis_images: scw_login
 	(scw stop -t qa-image-builder & scw rm -f qa-image-builder & wait `jobs -p` || true) 2>/dev/null
 
 	@echo "[+] Generating an ssh key if needed..."
-	test -f $HOME/.ssh/id_rsa || ssh-keygen -t rsa -f $HOME/.ssh/id_rsa -N ""
+	test -f $(HOME)/.ssh/id_rsa || ssh-keygen -t rsa -f $(HOME)/.ssh/id_rsa -N ""
 
 	@echo "[+] Spawning a new builder..."
 	scw -D run --detach --tmp-ssh-key --name=qa-image-builder image-builder 2>&1 | anonuuid
