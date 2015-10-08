@@ -31,7 +31,7 @@ travis:
 	test -z "$(TRAVIS)" -o "$(TRAVIS_PULL_REQUEST)" = false || URI="$(URI)" REVISION="$(REVISION)" $(MAKE) "travis_$(TYPE)"
 
 	@# run on travis for non pull-requests
-	test -n "$(TRAVIS)" -a "$(TRAVIS_PULL_REQUEST)" = false && echo "Not on a PR, nothing to do"
+	test -n "$(TRAVIS)" -a "$(TRAVIS_PULL_REQUEST)" = false && echo "Not on a PR, nothing to do" || true
 
 
 .PHONY: travis_kernels
