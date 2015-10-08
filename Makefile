@@ -73,7 +73,7 @@ travis_images: scw_login
 	scw inspect server:image-builder | anonuuid
 
 	@echo "[+] Logging in to Docker hub..."
-	@scw exec image-builder docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USER)" -p="$(TRAVIS_DOCKER_PASSWORD)"
+	@test -z "$(TRAVIS_DOCKER_EMAIL)" || scw exec image-builder docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USER)" -p="$(TRAVIS_DOCKER_PASSWORD)"
 	scw exec image-builder docker version
 	scw exec image-builder docker info
 
