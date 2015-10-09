@@ -5,6 +5,14 @@ all: travis
 scw_login: $(HOME)/.scwrc
 
 
+.PHONY: docker_login
+docker_login: $(HOME)/.dockercfg
+
+
+$(HOME)/.dockercfg:
+	@test -n "$(TRAVIS_DOCKER_EMAIL)" && docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USERNAME)" -p="$(TRAVIS_DOCKER_PASSWORD)"
+
+
 $(HOME)/.scwrc:
 	@if [ "$(TRAVIS_SCALEWAY_TOKEN)" -a "$(TRAVIS_SCALEWAY_ORGANIZATION)" ]; then \
 	  echo '{"api_endpoint":"https://api.scaleway.com/","account_endpoint":"https://account.scaleway.com/","organization":"$(TRAVIS_SCALEWAY_ORGANIZATION)","token":"$(TRAVIS_SCALEWAY_TOKEN)"}' > ~/.scwrc && \
@@ -48,7 +56,7 @@ travis_kernels:
 
 
 .PHONY: travis_images
-travis_images: scw_login
+travis_images: scw_login docker_login
 	@test -n "$(URI)" || (echo "Error: URI is missing"; exit 1)
 	@test -n "$(REVISION)" || (echo "Error: REVISION is missing"; exit 1)
 
@@ -77,8 +85,8 @@ travis_images: scw_login
 	@echo "[+] Getting information about the server..."
 	scw inspect server:$(SERVER) | anonuuid
 
-	@echo "[+] Logging in to Docker hub..."
-	@test -z "$(TRAVIS_DOCKER_EMAIL)" || (scw exec $(SERVER) docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USERNAME)" -p="$(TRAVIS_DOCKER_PASSWORD)")
+	@echo "[+] Logging in to Docker hub on builder..."
+	cat ~/.dockercfg | scw exec $(SERVER) 'cat > ~/.dockercfg'
 	scw exec $(SERVER) docker version
 	scw exec $(SERVER) docker info
 
