@@ -54,7 +54,7 @@ travis_images: scw_login
 
 	$(eval REPONAME := $(shell echo $(URI) | cut -d/ -f3))
 	$(eval REPOURL := $(shell echo $(URI) | cut -d/ -f1-3))
-	$(eval SUBDIR := $(shell echo $(URI) | cut -d/ -f4-))
+	$(eval SUBDIR := $(shell echo $(URI) | cut -d/ -f4))
 
 	@echo "[+] Flushing cache..."
 	test -f ~/.scw-cache.db && scw _flush-cache || true
