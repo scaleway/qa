@@ -69,7 +69,7 @@ travis_images: scw_login
 	test -f $(HOME)/.ssh/id_rsa || ssh-keygen -t rsa -f $(HOME)/.ssh/id_rsa -N ""
 
 	@echo "[+] Spawning a new builder..."
-	$(eval SERVER := $(shell scw run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder))
+	$(eval SERVER := $(shell scw -D run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder))
 
 	@echo "[+] Waiting for server to be available..."
 	scw exec -w -T=300 $(SERVER) uptime
