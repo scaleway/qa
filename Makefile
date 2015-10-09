@@ -91,7 +91,8 @@ travis_images: scw_login
 
 	# FIXME: push on store
 
-	# FIXME: create image
+	@echo "[+] Creating a scaleway image..."
+	scw exec image-builder 'cd $(REPONAME); make image_on_local'
 
 	@echo "[+] Cleaning up..."
 	(scw stop -t qa-image-builder & scw rm -f qa-image-builder & wait `jobs -p` || true) 2>/dev/null
