@@ -19,7 +19,7 @@ $(HOME)/.scwrc:
 travis:
 	@echo travis_pull_request='$(TRAVIS_PULL_REQUEST)' travis_commit='$(TRAVIS_COMMIT)' travis_tag='$(TRAVIS_TAG)' travis_branch='$(TRAVIS_BRANCH)'
 
-	@test `find . -name .todo | awk 'END{print NR}'` -eq 1 || (echo "Error: You need to only have 1 .todo file at a time. Exiting..."; exit 1)
+	@test `git diff --name-status master...HEAD | grep .todo | awk 'END{print NR}'` -eq 1 || (echo "Error: You need to only have 1 .todo file at a time. Exiting..."; exit 1)
 
 	$(eval TYPE := $(shell find . -name .todo | cut -d/ -f2))
 	$(eval URI := $(shell find . -name .todo | sed 's@^./[^/]*/@@;s@/[0-9]*/.todo$$@@'))
