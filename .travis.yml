@@ -11,3 +11,9 @@ install:
 
 script:
 - make travis
+# split into multiple commands
+# - make travis_prepare
+# - make travis_build
+# - make travis_test
+# - make travis_deploy
+# - make travis_clean
