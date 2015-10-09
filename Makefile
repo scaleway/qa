@@ -19,7 +19,9 @@ $(HOME)/.scwrc:
 travis:
 	@echo travis_pull_request='$(TRAVIS_PULL_REQUEST)' travis_commit='$(TRAVIS_COMMIT)' travis_tag='$(TRAVIS_TAG)' travis_branch='$(TRAVIS_BRANCH)'
 
-	@test `git diff --name-status master...HEAD | grep '/.build' | awk 'END{print NR}'` -eq 1 || (echo "Error: You need to have one and only one '.build' file at a time. Exiting..."; exit 1)
+	@if [ -z "$(TRAVIS)" -o "$(TRAVIS_PULL_REQUEST)" != false ]; then \
+	  test `git diff --name-status master...HEAD | grep '/.build' | awk 'END{print NR}'` -eq 1 || (echo "Error: You need to have one and only one '.build' file at a time. Exiting..."; exit 1); \
+	fi
 
 	$(eval TYPE := $(shell find . -name ".build" | cut -d/ -f2))
 	$(eval URI := $(shell find . -name ".build" | sed 's@^./[^/]*/@@;s@/[0-9]*/\\.build$$@@'))
