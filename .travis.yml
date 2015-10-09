@@ -16,6 +16,7 @@ before_script:
 script:
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make build;   fi
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make test;    fi
+after_success:
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make deploy;  fi
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make clean;   fi
 after_failure:
