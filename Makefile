@@ -1,18 +1,11 @@
 all: travis
 
 
-.PHONY: scw_login
-scw_login: $(HOME)/.scwrc
+ACTIONS = prepare build test deploy clean
 
 
-.PHONY: docker_login
-docker_login: $(HOME)/.dockercfg
-
-
-$(HOME)/.dockercfg:
-	@test -n "$(TRAVIS_DOCKER_EMAIL)" && docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USERNAME)" -p="$(TRAVIS_DOCKER_PASSWORD)"
-
-
+.PHONY: _scw_login
+_scw_login: $(HOME)/.scwrc
 $(HOME)/.scwrc:
 	@if [ "$(TRAVIS_SCALEWAY_TOKEN)" -a "$(TRAVIS_SCALEWAY_ORGANIZATION)" ]; then \
 	  echo '{"api_endpoint":"https://api.scaleway.com/","account_endpoint":"https://account.scaleway.com/","organization":"$(TRAVIS_SCALEWAY_ORGANIZATION)","token":"$(TRAVIS_SCALEWAY_TOKEN)"}' > ~/.scwrc && \
@@ -23,99 +16,50 @@ $(HOME)/.scwrc:
 	fi
 
 
-.PHONY: travis
-travis:
-	@echo travis_pull_request='$(TRAVIS_PULL_REQUEST)' travis_commit='$(TRAVIS_COMMIT)' travis_tag='$(TRAVIS_TAG)' travis_branch='$(TRAVIS_BRANCH)'
+.PHONY: _docker_login
+_docker_login: $(HOME)/.dockercfg
+$(HOME)/.dockercfg:
+	@test -n "$(TRAVIS_DOCKER_EMAIL)" && docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USERNAME)" -p="$(TRAVIS_DOCKER_PASSWORD)"
 
-	@if [ -z "$(TRAVIS)" -o "$(TRAVIS_PULL_REQUEST)" != false ]; then \
-	  test `git diff --name-status master...HEAD | grep '/.build' | awk 'END{print NR}'` -eq 1 || (echo "Error: You need to have one and only one '.build' file at a time. Exiting..."; exit 1); \
-	fi
+
+.PHONY: _sshkey
+_sshkey: $(HOME)/.ssh/id_rsa
+$(HOME)/.ssh/id_rsa:
+	@echo "[+] Generating an ssh key if needed..."
+	test -f $(HOME)/.ssh/id_rsa || ssh-keygen -t rsa -f $(HOME)/.ssh/id_rsa -N ""
+
+
+.PHONY: _setenv
+_setenv:
+	@mkdir -p .tmp
+	@#echo travis_pull_request='$(TRAVIS_PULL_REQUEST)' travis_commit='$(TRAVIS_COMMIT)' travis_tag='$(TRAVIS_TAG)' travis_branch='$(TRAVIS_BRANCH)'
+	@test `git diff --name-status master...HEAD | grep '/.build' | awk 'END{print NR}'` -eq 1 || (echo "Error: You need to have one and only one '.build' file at a time. Exiting..."; exit 1); \
 
 	$(eval TYPE := $(shell find . -name ".build" | cut -d/ -f2))
 	$(eval URI := $(shell find . -name ".build" | sed 's@^./[^/]*/@@;s@/[0-9]*/\\.build$$@@'))
 	$(eval REVISION := $(shell find . -name ".build" | sed 's@.*/\([0-9]*\)/\\.build$$@\1@'))
-
-	@# run outside of travis
-	test -n "$(TRAVIS)" || URI="$(URI)" REVISION="$(REVISION)" $(MAKE) "travis_$(TYPE)"
-	@# run on travis only for pull-requests
-	test -z "$(TRAVIS)" -o "$(TRAVIS_PULL_REQUEST)" = false || URI="$(URI)" REVISION="$(REVISION)" $(MAKE) "travis_$(TYPE)"
-
-	@# run on travis for non pull-requests
-	test -n "$(TRAVIS)" -a "$(TRAVIS_PULL_REQUEST)" = false && echo "Not on a PR, nothing to do" || true
-
-
-.PHONY: travis_kernels
-travis_kernels:
-	@test -n "$(URI)" || (echo "Error: URI is missing"; exit 1)
-	@test -n "$(REVISION)" || (echo "Error: REVISION is missing"; exit 1)
-	@echo "Building kernel..."
-
-	$(eval KERNEL := $(shell echo "$(URI)" | sed 's@github.com/scaleway/kernel-tools/@@'))
-	test -d kernel-tools || git clone --single-branch https://github.com/scaleway/kernel-tools
-	cd kernel-tools; make KERNEL="$(KERNEL)" build
-
-
-.PHONY: travis_images
-travis_images: scw_login docker_login
-	@test -n "$(URI)" || (echo "Error: URI is missing"; exit 1)
-	@test -n "$(REVISION)" || (echo "Error: REVISION is missing"; exit 1)
-
 	$(eval REPONAME := $(shell echo $(URI) | cut -d/ -f3))
 	$(eval REPOURL := $(shell echo $(URI) | cut -d/ -f1-3))
 	$(eval SUBDIR := $(shell echo $(URI) | cut -d/ -f4))
+	$(eval SERVER := $(shell test -f .tmp/server && cat .tmp/server || echo ""))
 
-	@echo "[+] Flushing cache..."
-	test -f ~/.scw-cache.db && scw _flush-cache || true
 
-	@echo "[+] Cleaning old builder(s) if any..."
-	(for server in `scw ps -f "tags=image=$(REPONAME) name=qa-image-builder" -q`; do scw stop -t $$server & scw rm -f $$server & done; wait `jobs -p` || true)
+.PHONY: travis
+travis: _setenv
+	@test -z "$(TRAVIS)" || (echo "'make travis' is made for testing travis-like build outside of travis"; exit 1)
 
-	@echo "[+] Flushing cache after cleanup..."
-	test -f ~/.scw-cache.db && scw _flush-cache || true
+	$(MAKE) prepare_$(TYPE)
+	$(MAKE) build_$(TYPE)
+	$(MAKE) test_$(TYPE)
+	$(MAKE) deploy_$(TYPE)
+	$(MAKE) clean_$(TYPE)
 
-	@echo "[+] Generating an ssh key if needed..."
-	test -f $(HOME)/.ssh/id_rsa || ssh-keygen -t rsa -f $(HOME)/.ssh/id_rsa -N ""
 
-	@echo "[+] Spawning a new builder..."
-	$(eval SERVER := $(shell scw -D run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder))
+.PHONY: $(ACTIONS)
+$(ACTIONS): _setenv
+	$(MAKE) $@_$(TYPE)
 
-	@echo "[+] Waiting for server to be available..."
-	scw exec -w -T=300 $(SERVER) uptime
 
-	@echo "[+] Getting information about the server..."
-	scw inspect server:$(SERVER) | anonuuid
-
-	@echo "[+] Logging in to Docker hub on builder..."
-	cat ~/.dockercfg | scw exec $(SERVER) 'cat > ~/.dockercfg'
-	scw exec $(SERVER) docker version
-	scw exec $(SERVER) docker info
-
-	@echo "[+] Logging in to scw..."
-	@scw exec $(SERVER) scw login --organization=$(shell cat ~/.scwrc | jq .organization) --token=$(shell cat ~/.scwrc | jq .token) -s
-
-	@echo "[+] Fetching the image sources..."
-	scw exec $(SERVER) git clone --single-branch https://$(REPOURL)
-
-	@echo "[+] Building the image..."
-	scw exec $(SERVER) 'cd $(REPONAME)/$(SUBDIR); make build'
-
-	@echo "[+] Releasing image on docker hub..."
-	scw exec $(SERVER) 'cd $(REPONAME)/$(SUBDIR); make release'
-
-	# FIXME: push on store
-
-	@echo "[+] Creating a scaleway image..."
-	scw exec $(SERVER) 'cd $(REPONAME)/$(SUBDIR); make image_on_local'
-
-	# Test image
-
-	@echo "[+] Cleaning up..."
-	(for server in `scw ps -f "tags=image=$(REPONAME) name=qa-image-builder" -q`; do scw stop -t $$server & scw rm -f $$server & done; wait `jobs -p` || true)
-
-.PHONY: travis_initrds
-travis_initrd:
-	@test -n "$(URI)" || (echo "Error: URI is missing"; exit 1)
-	@test -n "$(REVISION)" || (echo "Error: REVISION is missing"; exit 1)
-	@echo "Building initrd..."
-
-	@echo "Error: Not yet implemented"; exit 1
+-include ./rules_images.mk
+-include ./rules_kernels.mk
+-include ./rules_initrds.mk
