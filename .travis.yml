@@ -6,8 +6,10 @@ services:
 - docker
 
 install:
-- wget https://github.com/scaleway/scaleway-cli/releases/download/v1.5.0/scw_1.5.0_amd64.deb && sudo dpkg -i scw*.deb && rm -f scw*.deb && scw version
-- wget https://github.com/moul/anonuuid/releases/download/v1.0.0/anonuuid_1.0_amd64.deb && sudo dpkg -i anonuuid*.deb && rm -f anonuuid*.deb && anonuuid --version
+- wget https://github.com/scaleway/scaleway-cli/releases/download/v1.5.0/scw_1.5.0_amd64.deb
+  && sudo dpkg -i scw*.deb && rm -f scw*.deb && scw version
+- wget https://github.com/moul/anonuuid/releases/download/v1.0.0/anonuuid_1.0_amd64.deb
+  && sudo dpkg -i anonuuid*.deb && rm -f anonuuid*.deb && anonuuid --version
 
 before_script:
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make prepare; fi
@@ -18,3 +20,7 @@ script:
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make clean;   fi
 after_failure:
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make clean;   fi
+
+notifications:
+  slack:
+    secure: bDly/AbODGVU2u3gXoZay2dA13QZPMYquE/bokXduFTOyWj6Pm4RsH1lxvGYumEWk87zs9r68vfUnaUvxozoGmIIIOjoZhs/KUPi6xXU0zx45e7StjVpNA/84yKNdky+mc72vjHqxYalgmlI1h8v0K981psWvT2HadHEXQ3xpF0j4ctUcwjIfIpfkDS5st/gRJza2gBANSBzj0WS8mESOgycOIA9f8lpGpIA4zrvvz45o+zpTzeK93bkre1hvq4l0YJZnVJu1zlRzyw4ffOcRJbdRXZqqHyLHNnB41wMweTT+gW31kkcw9PYkEZsJD8AokcPslVveRRrOeAkG9jL8eJc7dyMdnJSO7W35UPj63UxbzlPr7rVX4PXzlvlzQq0YLJJURRogo78SHplrRKI5LSEgLIzyo9ySuhaOy/5mcdtfCkaSSgLcVz9WjNfwzJ4krrAlZkfzXcA07ZTjU68nUc3KVpgihLMD1QW/SGPR0fJIYpYgvKH3CDrGe5o1eD6xwIrVj975H0c9uyAyXpkcla69s8KkBhZCSrla0lE0q0ooFqBKCkhVnc/HBw63r4QaCuzQZyknV+RPwa0yXqbgaMb3LHMIiuWN5IMfoGCayWyC2mjzWOKNWKvIAQ3ehyxix+tX4+5Uu8okToLhu/nP6wJPU6bmUokExm0eI7b9TE=
