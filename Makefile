@@ -18,8 +18,14 @@ $(HOME)/.scwrc:
 
 .PHONY: _docker_login
 _docker_login: $(HOME)/.dockercfg
+
+
+.PHONY: $(HOME)/.dockercfg
 $(HOME)/.dockercfg:
-	@test -n "$(TRAVIS_DOCKER_EMAIL)" && docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USERNAME)" -p="$(TRAVIS_DOCKER_PASSWORD)"
+	@if [ ! -s $@ ]; then \
+	  echo "Generating ~/.dockercfg file"; \
+	  test -n "$(TRAVIS_DOCKER_EMAIL)" && docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USERNAME)" -p="$(TRAVIS_DOCKER_PASSWORD)"; \
+	fi
 
 
 .PHONY: _sshkey
