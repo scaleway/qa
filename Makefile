@@ -47,7 +47,12 @@ _setenv:
 	$(eval REPONAME := $(shell echo $(URI) | cut -d/ -f3))
 	$(eval REPOURL := $(shell echo $(URI) | cut -d/ -f1-3))
 	$(eval SUBDIR := $(shell echo $(URI) | cut -d/ -f4))
+
+	# Images specific
 	$(eval SERVER := $(shell test -f .tmp/server && cat .tmp/server || echo ""))
+
+	# Kernerls specific
+	$(eval KERNEL := $(shell echo "$(URI)" | sed 's@github.com/scaleway/kernel-tools/@@'))
 
 
 .PHONY: travis
