@@ -58,7 +58,7 @@ travis_images: scw_login
 	test -f ~/.scw-cache.db && scw _flush-cache || true
 
 	@echo "[+] Cleaning old builder(s) if any..."
-	(for server in `scw ps -f name=qa-image-builder -q`; do scw stop -t $$server & scw rm -f $$server & done; wait `jobs -p` || true) 2>/dev/null
+	(for server in `scw ps -f "tags=image=$(REPONAME) name=qa-image-builder" -q`; do scw stop -t $$server & scw rm -f $$server & done; wait `jobs -p` || true)
 
 	@echo "[+] Flushing cache after cleanup..."
 	test -f ~/.scw-cache.db && scw _flush-cache || true
@@ -67,40 +67,41 @@ travis_images: scw_login
 	test -f $(HOME)/.ssh/id_rsa || ssh-keygen -t rsa -f $(HOME)/.ssh/id_rsa -N ""
 
 	@echo "[+] Spawning a new builder..."
-	scw -D run --detach --tmp-ssh-key --name=qa-image-builder image-builder 2>&1 | anonuuid
+	$(eval SERVER := $(shell scw create --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder))
+	scw start $(SERVER)
 
 	@echo "[+] Waiting for server to be available..."
-	echo | scw exec -w -T=300 image-builder uptime
+	scw exec -w -T=300 $(SERVER) uptime
 
 	@echo "[+] Getting information about the server..."
-	scw inspect server:image-builder | anonuuid
+	scw inspect server:$(SERVER) | anonuuid
 
 	@echo "[+] Logging in to Docker hub..."
-	@test -z "$(TRAVIS_DOCKER_EMAIL)" || (scw exec image-builder docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USERNAME)" -p="$(TRAVIS_DOCKER_PASSWORD)")
-	scw exec image-builder docker version
-	scw exec image-builder docker info
+	@test -z "$(TRAVIS_DOCKER_EMAIL)" || (scw exec $(SERVER) docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USERNAME)" -p="$(TRAVIS_DOCKER_PASSWORD)")
+	scw exec $(SERVER) docker version
+	scw exec $(SERVER) docker info
 
 	@echo "[+] Logging in to scw..."
-	@scw exec image-builder scw login --organization=$(shell cat ~/.scwrc | jq .organization) --token=$(shell cat ~/.scwrc | jq .token) -s
+	@scw exec $(SERVER) scw login --organization=$(shell cat ~/.scwrc | jq .organization) --token=$(shell cat ~/.scwrc | jq .token) -s
 
 	@echo "[+] Fetching the image sources..."
-	scw exec image-builder git clone --single-branch https://$(REPOURL)
+	scw exec $(SERVER) git clone --single-branch https://$(REPOURL)
 
 	@echo "[+] Building the image..."
-	scw exec image-builder 'cd $(REPONAME); make build'
+	scw exec $(SERVER) 'cd $(REPONAME)/$(SUBDIR); make build'
 
 	@echo "[+] Releasing image on docker hub..."
-	scw exec image-builder 'cd $(REPONAME); make release'
+	scw exec $(SERVER) 'cd $(REPONAME)/$(SUBDIR); make release'
 
 	# FIXME: push on store
 
 	@echo "[+] Creating a scaleway image..."
-	scw exec image-builder 'cd $(REPONAME); make image_on_local'
+	scw exec $(SERVER) 'cd $(REPONAME)/$(SUBDIR); make image_on_local'
 
 	# Test image
 
 	@echo "[+] Cleaning up..."
-	(scw stop -t qa-image-builder & scw rm -f qa-image-builder & wait `jobs -p` || true) 2>/dev/null
+	(for server in `scw ps -f "tags=image=$(REPONAME) name=qa-image-builder" -q`; do scw stop -t $$server & scw rm -f $$server & done; wait `jobs -p` || true)
 
 .PHONY: travis_initrds
 travis_initrd:
