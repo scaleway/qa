@@ -57,8 +57,11 @@ travis_images: scw_login
 	@echo "[+] Flushing cache..."
 	test -f ~/.scw-cache.db && scw _flush-cache || true
 
-	@echo "[+] Cleaning old builder if any..."
-	(scw stop -t qa-image-builder & scw rm -f qa-image-builder & wait `jobs -p` || true) 2>/dev/null
+	@echo "[+] Cleaning old builder(s) if any..."
+	(for server in `scw ps -f name=qa-image-builder -q`; do scw stop -t $$server & scw rm -f $$server & done; wait `jobs -p` || true) 2>/dev/null
+
+	@echo "[+] Flushing cache after cleanup..."
+	test -f ~/.scw-cache.db && scw _flush-cache || true
 
 	@echo "[+] Generating an ssh key if needed..."
 	test -f $(HOME)/.ssh/id_rsa || ssh-keygen -t rsa -f $(HOME)/.ssh/id_rsa -N ""
@@ -93,6 +96,8 @@ travis_images: scw_login
 
 	@echo "[+] Creating a scaleway image..."
 	scw exec image-builder 'cd $(REPONAME); make image_on_local'
+
+	# Test image
 
 	@echo "[+] Cleaning up..."
 	(scw stop -t qa-image-builder & scw rm -f qa-image-builder & wait `jobs -p` || true) 2>/dev/null
