@@ -13,6 +13,7 @@ _prepare_images_setup_server: _setenv _docker_login _scw_login _prepare_images_s
 
 	@echo "[+] Logging in to Docker hub on builder..."
 	@scw exec $(SERVER) "echo -n `openssl enc -base64 -A -in ~/.dockercfg` | openssl base64 -d -A > ~/.dockercfg"
+	@scw exec $(SERVER) "mkdir -p .docker; echo -n `openssl enc -base64 -A -in ~/.docker/config.json` | openssl base64 -d -A > ~/.docker/config.json"
 	scw exec $(SERVER) docker version
 	scw exec $(SERVER) docker info
 
