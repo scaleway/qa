@@ -41,18 +41,37 @@ _setenv:
 	@#echo travis_pull_request='$(TRAVIS_PULL_REQUEST)' travis_commit='$(TRAVIS_COMMIT)' travis_tag='$(TRAVIS_TAG)' travis_branch='$(TRAVIS_BRANCH)'
 	@test `git diff --name-status master...HEAD | grep '/.build' | awk 'END{print NR}'` -eq 1 || (echo "Error: You need to have one and only one '.build' file at a time. Exiting..."; exit 1); \
 
-	$(eval TYPE := $(shell find . -name ".build" | cut -d/ -f2))
-	$(eval URI := $(shell find . -name ".build" | sed 's@^./[^/]*/@@;s@/[0-9]*/\\.build$$@@'))
-	$(eval REVISION := $(shell find . -name ".build" | sed 's@.*/\([0-9]*\)/\\.build$$@\1@'))
+	$(eval CHANGES := $(shell git diff --name-status master...HEAD | grep '/.build' | awk '{ print $$2 }'))
+	$(eval TYPE := $(shell echo $(CHANGES) | cut -d/ -f1))
+	$(eval URI := $(shell echo $(CHANGES) | sed 's@^[^/]*/@@;s@/[0-9]*/\.build$$@@'))
+	$(eval REVISION := $(shell echo $(CHANGES) | sed 's@^.*/\([0-9]*\)/\.build$$@\1@'))
 	$(eval REPONAME := $(shell echo $(URI) | cut -d/ -f3))
 	$(eval REPOURL := $(shell echo $(URI) | cut -d/ -f1-3))
 	$(eval SUBDIR := $(shell echo $(URI) | cut -d/ -f4))
 
-	# Images specific
+	@# Images specific
 	$(eval SERVER := $(shell test -f .tmp/server && cat .tmp/server || echo ""))
 
-	# Kernerls specific
+	@# Kernerls specific
 	$(eval KERNEL := $(shell echo "$(URI)" | sed 's@github.com/scaleway/kernel-tools/@@'))
+
+
+.PHONY: info
+info: _setenv
+	@echo changes='$(CHANGES)'
+	@echo travis='$(TRAVIS)'
+	@echo travis_pull_request='$(TRAVIS_PULL_REQUEST)'
+	@echo travis_commit='$(TRAVIS_COMMIT)'
+	@echo travis_branch='$(TRAVIS_BRANCH)'
+	@echo travis_tag='$(TRAVIS_TAG)'
+	@echo type='$(TYPE)'
+	@echo uri='$(URI)'
+	@echo revision='$(REVISION)'
+	@echo reponame='$(REPONAME)'
+	@echo repourl='$(REPOURL)'
+	@echo subdir='$(SUBDIR)'
+	@echo server='$(SERVER)'
+	@echo kernel='$(KERNEL)'
 
 
 .PHONY: travis
