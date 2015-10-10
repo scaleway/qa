@@ -25,6 +25,9 @@ $(HOME)/.dockercfg:
 	@if [ ! -s $@ ]; then \
 	  echo "Generating ~/.dockercfg file"; \
 	  test -n "$(TRAVIS_DOCKER_EMAIL)" && docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USERNAME)" -p="$(TRAVIS_DOCKER_PASSWORD)"; \
+	  touch $@; \
+	  mkdir -p $(HOME)/.docker; \
+	  touch $(HOME)/.docker/config.json; \
 	fi
 
 
