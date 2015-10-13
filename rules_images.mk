@@ -18,10 +18,11 @@ _prepare_images_setup_server: _setenv _docker_login _scw_login _prepare_images_s
 	scw exec $(SERVER) docker info
 
 	@echo "[+] Logging in to scw..."
-	@scw exec $(SERVER) scw login --organization=$(shell cat ~/.scwrc | jq .organization) --token=$(shell cat ~/.scwrc | jq .token) -s
+	@scw exec $(SERVER) scw login --organization="$(shell cat ~/.scwrc | jq .organization)" --token="$(shell cat ~/.scwrc | jq .token)" -s
 
 	@echo "[+] Fetching the image sources..."
-	scw exec $(SERVER) git clone --single-branch https://$(REPOURL)
+	scw exec $(SERVER) git clone --single-branch "https://$(REPOURL)"
+	scw exec $(SERVER) "cd "$(REPONAME)"; git log HEAD^..HEAD"
 
 
 .PHONY: _prepare_images_spawn_server
@@ -35,7 +36,7 @@ _prepare_images_spawn_server: _scw_login _sshkey
 .PHONY: build_images
 build_images: _setenv
 	@echo "[+] Building the image..."
-	scw exec $(SERVER) 'cd $(REPONAME)/$(SUBDIR); make build'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make build'
 
 
 .PHONY: test_images
@@ -46,19 +47,19 @@ test_images: _setenv
 .PHONY: deploy_images
 deploy_images: _setenv
 	@echo "[+] Releasing image on docker hub..."
-	scw exec $(SERVER) 'cd $(REPONAME)/$(SUBDIR); make release'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make release'
 
 	@echo "[+] Publishing on store..."
 	@echo "WARNING: NOT YET IMPLEMENTED"
 
 	@echo "[+] Creating a scaleway image..."
-	scw exec $(SERVER) 'cd $(REPONAME)/$(SUBDIR); make image_on_local'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make image_on_local'
 
 
 .PHONY: clean_images
 clean_images: _setenv
 	@echo "[+] Cleaning up..."
 	@test -f ~/.scw-cache.db && scw _flush-cache >/dev/null || true
-	(for server in `scw ps -f "tags=image=$(REPONAME) name=qa-image-builder" -q`; do scw stop -t $$server & scw rm -f $$server & done; wait `jobs -p` || true) 2>/dev/null
+	(for server in `scw ps -f "tags=image=$(REPONAME) name=qa-image-builder" -q`; do scw stop -t "$$server" & scw rm -f "$$server" & done; wait `jobs -p` || true) 2>/dev/null
 	@test -f ~/.scw-cache.db && scw _flush-cache >/dev/null || true
 	rm -f .tmp/server
