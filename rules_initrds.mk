@@ -1,23 +1,27 @@
 .PHONY: prepare_initrds
 prepare_initrds:
-	@echo "Error: Not yet implemented"; exit 1
+	test -d workspace || git clone --single-branch https://github.com/scaleway/initrd workspace
 
 
 .PHONY: build_initrds
 build_initrds:
-	@echo "Error: Not yet implemented"; exit 1
+	cd workspace/Linux; make build TARGET=armv7l
+	cd workspace/Linux; make build TARGET=x86_64
 
 
 .PHONY: test_initrds
 test_initrds:
-	@echo "Error: Not yet implemented"; exit 1
+	@echo "Error: Not yet implemented"
 
 
 .PHONY: deploy_initrds
 deploy_initrds:
-	@echo "Error: Not yet implemented"; exit 1
+	cd workspace/Linux; make publish_on_s3 TARGET=armv7l
+	cd workspace/Linux; make publish_on_s3 TARGET=x86_64
+	cd workspace/Linux; make publish_on_store TARGET=armv7l
+	cd workspace/Linux; make publish_on_store TARGET=x86_64
 
 
 .PHONY: clean_initrds
 clean_initrds:
-	@echo "Error: Not yet implemented"; exit 1
+	-
