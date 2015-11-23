@@ -31,10 +31,10 @@ $(HOME)/.s3cfg:
 .PHONY: _netrc_login
 _netrc_login: $(HOME)/.netrc
 $(HOME)/.netrc:
-	@if [ "$(STORE_HOSTNAME)" -a "$(STORE_FTP_USERNAME)" -a "$(STORE_FTP_PASSWORD)" ]; then \
+	@if [ "$(STORE_HOSTNAME)" -a "$(STORE_USERNAME)" -a "$(STORE_PASSWORD)" ]; then \
 	  echo machine "$(STORE_HOSTNAME)" > $@; \
-	  echo login "$(STORE_FTP_USERNAME)" >> $@; \
-	  echo password "$(STORE_FTP_PASSWORD)" >> $@; \
+	  echo login "$(STORE_USERNAME)" >> $@; \
+	  echo password "$(STORE_PASSWORD)" >> $@; \
 	else \
 	  echo "Cannot login to 'netrc', credentials are missing"; \
 	  exit 1; \
