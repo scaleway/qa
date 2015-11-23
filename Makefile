@@ -11,7 +11,20 @@ $(HOME)/.scwrc:
 	  echo '{"api_endpoint":"https://api.scaleway.com/","account_endpoint":"https://account.scaleway.com/","organization":"$(TRAVIS_SCALEWAY_ORGANIZATION)","token":"$(TRAVIS_SCALEWAY_TOKEN)"}' > ~/.scwrc && \
 	  chmod 600 ~/.scwrc; \
 	else \
-	  echo "Cannot login, credentials are missing"; \
+	  echo "Cannot login to 'scw', credentials are missing"; \
+	  exit 1; \
+	fi
+
+
+.PHONY: _s3cmd_login
+_s3cmd_login: $(HOME)/.s3cfg
+$(HOME)/.s3cfg:
+	wget https://raw.githubusercontent.com/scaleway/image-tools/master/image-builder/s3cfg_template -O $@
+	@if [ "$(TRAVIS_SCALEWAY_TOKEN)" -a "$(TRAVIS_SCALEWAY_ORGANIZATION)" ]; then \
+	  echo access_key=$(TRAVIS_SCALEWAY_ORGANIZATION) >> $@; \
+	  echo secret_key=$(TRAVIS_SCALEWAY_TOKAN) >> $@; \
+	else \
+	  echo "Cannot login to 's3cmd', credentials are missing"; \
 	  exit 1; \
 	fi
 
