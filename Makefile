@@ -39,6 +39,7 @@ $(HOME)/.netrc:
 	  echo "Cannot login to 'netrc', credentials are missing"; \
 	  exit 1; \
 	fi
+	chmod 600 $@
 
 
 .PHONY: _docker_login
