@@ -6,7 +6,7 @@ services:
 - docker
 
 install:
-- apt-get install -y -q u-boot-tools s3cmd
+- sudo apt-get install -y -q u-boot-tools s3cmd
 - travis_retry wget https://github.com/scaleway/scaleway-cli/releases/download/v1.6.0/scw_1.6.0_amd64.deb
   && sudo dpkg -i scw*.deb && rm -f scw*.deb && scw version
 - travis_retry wget https://github.com/moul/anonuuid/releases/download/v1.0.0/anonuuid_1.0_amd64.deb
