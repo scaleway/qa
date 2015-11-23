@@ -5,20 +5,23 @@ sudo: required
 services:
 - docker
 
+cache:
+- apt
+
 install:
-- sudo apt-get update && sudo apt-get install -y -q u-boot-tools s3cmd
+- sudo apt-get update && sudo apt-get install -y -qq u-boot-tools s3cmd
 - travis_retry wget https://github.com/scaleway/scaleway-cli/releases/download/v1.6.0/scw_1.6.0_amd64.deb
   && sudo dpkg -i scw*.deb && rm -f scw*.deb && scw version
 - travis_retry wget https://github.com/moul/anonuuid/releases/download/v1.0.0/anonuuid_1.0_amd64.deb
   && sudo dpkg -i anonuuid*.deb && rm -f anonuuid*.deb && anonuuid --version
 
 before_script:
-- if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make prepare; fi
+- if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make prepare || exit 1; fi
 script:
-- if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make build;   fi
-- if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make test;    fi
+- if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make build || exit 1;   fi
+- if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make test || exit 1;    fi
 after_success:
-- if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then travis_retry make deploy;  fi
+- if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then travis_retry make deploy || exit 1;  fi
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then travis_retry make clean;   fi
 after_failure:
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then travis_retry make clean;   fi
