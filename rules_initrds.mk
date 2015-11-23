@@ -15,11 +15,11 @@ test_initrds:
 
 
 .PHONY: deploy_initrds
-deploy_initrds: _s3cmd_login
+deploy_initrds: _s3cmd_login _netrc_login
 	cd workspace/Linux; make publish_on_s3 TARGET=armv7l
 	cd workspace/Linux; make publish_on_s3 TARGET=x86_64
-	@cd workspace/Linux; make -q publish_on_store_sftp TARGET=armv7l
-	@cd workspace/Linux; make -q publish_on_store_sftp TARGET=x86_64
+	cd workspace/Linux; make publish_on_store_sftp TARGET=armv7l
+	cd workspace/Linux; make publish_on_store_sftp TARGET=x86_64
 
 
 .PHONY: clean_initrds
