@@ -21,6 +21,7 @@ _prepare_images_setup_server: _setenv _docker_login _scw_login _prepare_images_s
 	@scw exec $(SERVER) scw login --organization="$(shell cat ~/.scwrc | jq .organization)" --token="$(shell cat ~/.scwrc | jq .token)" -s
 
 	@echo "[+] Fetching the image sources..."
+	scw exec $(SERVER) rm -rf "./$(REPONAME)"
 	scw exec $(SERVER) git clone --single-branch "https://$(REPOURL)"
 	scw exec $(SERVER) "cd "$(REPONAME)"; git log HEAD^..HEAD"
 
@@ -30,7 +31,8 @@ _prepare_images_spawn_server: _scw_login _sshkey
 	@$(MAKE) clean_images
 
 	@echo "[+] Spawning a new builder..."
-	scw run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder | tee .tmp/server
+	scw ps --filter=tags=permanent-builder -q | shuf | head -n1 > .tmp/server
+	@#scw run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder | tee .tmp/server
 
 
 .PHONY: build_images
