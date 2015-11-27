@@ -30,7 +30,7 @@ _prepare_images_setup_server: _setenv _docker_login _scw_login _prepare_images_s
 _prepare_images_spawn_server: _scw_login _sshkey
 	@$(MAKE) clean_images
 
-	@echo "[+] Spawning a new builder..."
+	@echo "[+] Picking a builder..."
 	scw ps --filter=tags=permanent-builder -q | shuf | head -n1 > .tmp/server
 	@#scw run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder | tee .tmp/server
 

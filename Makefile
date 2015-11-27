@@ -60,8 +60,14 @@ $(HOME)/.dockercfg:
 .PHONY: _sshkey
 _sshkey: $(HOME)/.ssh/id_rsa
 $(HOME)/.ssh/id_rsa:
-	@echo "[+] Generating an ssh key if needed..."
-	test -f $(HOME)/.ssh/id_rsa || ssh-keygen -t rsa -f $(HOME)/.ssh/id_rsa -N ""
+	@if [ -z "$(TRAVIS_SSH_PRIV_KEY)" ]; then \
+	  echo "[+] Generating an ssh key if needed..."; \
+	  test -f $@ || ssh-keygen -t rsa -f $@ -N ""; \
+	else \
+	  echo "[+] Writing ssh key from environment..."; \
+	  echo $(TRAVIS_SSH_PRIV_KEY) | tr "@" "\n" | tr "_" " " > $@; \
+	  chmod 600 $@; \
+	fi
 
 
 .PHONY: _setenv
