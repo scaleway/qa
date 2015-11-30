@@ -5,7 +5,7 @@ prepare_kernels:
 
 .PHONY: build_kernels
 build_kernels: _setenv
-	cd kernel-tools; make KERNEL="$(KERNEL)" build
+	cd kernel-tools; make KERNEL="$(KERNEL)" REVISION="$(REVISION)" build
 
 
 .PHONY: test_kernels
@@ -15,8 +15,8 @@ test_kernels:
 
 .PHONY: deploy_kernels
 deploy_kernels: _s3cmd_login _netrc_login _setenv
-	cd kernel-tools; make KERNEL="$(KERNEL)" publish_on_store_sftp
-	cd kernel-tools; make KERNEL="$(KERNEL)" publish_on_s3
+	cd kernel-tools; make KERNEL="$(KERNEL)" REVISION="$(REVISION)" publish_on_store_sftp
+	cd kernel-tools; make KERNEL="$(KERNEL)" REVISION="$(REVISION)" publish_on_s3
 
 
 .PHONY: clean_kernels
