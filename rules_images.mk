@@ -52,7 +52,7 @@ deploy_images: _setenv
 	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make release'
 
 	@echo "[+] Publishing on store..."
-	@echo "WARNING: NOT YET IMPLEMENTED"
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make publish_on_store_sftp'
 
 	@echo "[+] Creating a scaleway image..."
 	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make image_on_local'
