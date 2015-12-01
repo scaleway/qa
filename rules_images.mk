@@ -55,7 +55,7 @@ deploy_images: _setenv
 	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make release'
 
 	@echo "[+] Publishing on store..."
-	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make publish_on_store_sftp'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make publish_on_store_sftp STORE_USERNAME=$(STORE_USERNAME) STORE_HOSTNAME=$(STORE_HOSTNAME)'
 
 	@echo "[+] Creating a scaleway image..."
 	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make image_on_local'
