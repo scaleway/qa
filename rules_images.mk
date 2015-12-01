@@ -11,14 +11,16 @@ _prepare_images_setup_server: _setenv _docker_login _scw_login _prepare_images_s
 	@echo "[+] Getting information about the server..."
 	scw inspect server:$(SERVER) | anonuuid
 
-	@echo "[+] Logging in to Docker hub on builder..."
+	@echo "[+] Writing up builder:~/.dockercfg"
 	@scw exec $(SERVER) "echo -n `openssl enc -base64 -A -in ~/.dockercfg` | openssl base64 -d -A > ~/.dockercfg"
+	@echo "[+] Writing up builder:~/.netrc"
 	@scw exec $(SERVER) "echo -n `openssl enc -base64 -A -in ~/.netrc` | openssl base64 -d -A > ~/.netrc"
+	@echo "[+] Writing up builder:~/.docker/config.json"
 	@scw exec $(SERVER) "mkdir -p .docker; echo -n `openssl enc -base64 -A -in ~/.docker/config.json` | openssl base64 -d -A > ~/.docker/config.json"
 	scw exec $(SERVER) docker version
 	scw exec $(SERVER) docker info
 
-	@echo "[+] Logging in to scw..."
+	@echo "[+] Writing up builder:~/.scwrc"
 	@scw exec $(SERVER) scw login --organization="$(shell cat ~/.scwrc | jq .organization)" --token="$(shell cat ~/.scwrc | jq .token)" -s
 
 	@echo "[+] Fetching the image sources..."
