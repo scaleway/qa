@@ -7,6 +7,7 @@ ACTIONS = prepare build test deploy clean
 .PHONY: _scw_login
 _scw_login: $(HOME)/.scwrc
 $(HOME)/.scwrc:
+	@echo "Writing ~/.scwrc"
 	@if [ "$(TRAVIS_SCALEWAY_TOKEN)" -a "$(TRAVIS_SCALEWAY_ORGANIZATION)" ]; then \
 	  echo '{"api_endpoint":"https://api.scaleway.com/","account_endpoint":"https://account.scaleway.com/","organization":"$(TRAVIS_SCALEWAY_ORGANIZATION)","token":"$(TRAVIS_SCALEWAY_TOKEN)"}' > ~/.scwrc && \
 	  chmod 600 ~/.scwrc; \
@@ -19,6 +20,7 @@ $(HOME)/.scwrc:
 .PHONY: _s3cmd_login
 _s3cmd_login: $(HOME)/.s3cfg
 $(HOME)/.s3cfg:
+	@echo "Writing ~/.s3cfg"
 	wget https://raw.githubusercontent.com/scaleway/image-tools/master/image-builder/s3cfg_template -O $@
 	@if [ "$(TRAVIS_SCALEWAY_TOKEN)" -a "$(TRAVIS_SCALEWAY_ORGANIZATION)" ]; then \
 	  echo access_key=$(TRAVIS_SCALEWAY_ORGANIZATION) >> $@; \
@@ -31,6 +33,7 @@ $(HOME)/.s3cfg:
 .PHONY: _netrc_login
 _netrc_login: $(HOME)/.netrc
 $(HOME)/.netrc:
+	@echo "Writing ~/.netrc"
 	@if [ "$(STORE_HOSTNAME)" -a "$(STORE_USERNAME)" -a "$(STORE_PASSWORD)" ]; then \
 	  echo machine "$(STORE_HOSTNAME)" > $@; \
 	  echo login "$(STORE_USERNAME)" >> $@; \
@@ -48,6 +51,7 @@ _docker_login: $(HOME)/.dockercfg
 
 .PHONY: $(HOME)/.dockercfg
 $(HOME)/.dockercfg:
+	@echo "Writing ~/.dockercfg"
 	@if [ ! -s $@ ]; then \
 	  echo "Generating ~/.dockercfg file"; \
 	  test -n "$(TRAVIS_DOCKER_EMAIL)" && docker login -e="$(TRAVIS_DOCKER_EMAIL)" -u="$(TRAVIS_DOCKER_USERNAME)" -p="$(TRAVIS_DOCKER_PASSWORD)"; \
@@ -60,6 +64,7 @@ $(HOME)/.dockercfg:
 .PHONY: _sshkey
 _sshkey: $(HOME)/.ssh/id_rsa
 $(HOME)/.ssh/id_rsa:
+	@echo "Writing ~/.ssh/id_rsa"
 	@if [ -z "$(TRAVIS_SSH_PRIV_KEY)" ]; then \
 	  echo "[+] Generating an ssh key if needed..."; \
 	  test -f $@ || ssh-keygen -t rsa -f $@ -N ""; \
