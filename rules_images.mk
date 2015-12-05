@@ -41,7 +41,7 @@ _prepare_images_spawn_server: _scw_login _sshkey
 .PHONY: build_images
 build_images: _setenv
 	@echo "[+] Building the image..."
-	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make build'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make build BUILD_OPTS="--pull"'
 
 
 .PHONY: test_images
