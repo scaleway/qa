@@ -26,7 +26,7 @@ _prepare_images_setup_server: _setenv _docker_login _scw_login _prepare_images_s
 	@echo "[+] Fetching the image sources..."
 	scw exec $(SERVER) rm -rf "./$(REPONAME)"
 	scw exec $(SERVER) git clone --single-branch "https://$(REPOURL)"
-	scw exec $(SERVER) "cd "$(REPONAME)"; git log HEAD^..HEAD"
+	scw exec $(SERVER) "cd "$(REPONAME)"; git show --summary"
 
 
 .PHONY: _prepare_images_spawn_server
