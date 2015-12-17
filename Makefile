@@ -87,10 +87,12 @@ _setenv:
 	$(eval REVISION := $(shell echo $(CHANGES) | sed 's@^.*/\([0-9]*\)/\.build$$@\1@'))
 	$(eval REPONAME := $(shell echo $(URI) | cut -d/ -f3))
 	$(eval REPOURL := $(shell echo $(URI) | cut -d/ -f1-3))
-	$(eval SUBDIR := $(shell echo $(URI) | cut -d/ -f4))
+	$(eval SUBDIR := $(shell echo $(URI) | cut -d/ -f4-))
 
 	@# Images specific
 	$(eval SERVER := $(shell test -f .tmp/server && cat .tmp/server || echo ""))
+	$(eval IMAGE_SUBDIR := $(shell echo $(SUBDIR) | sed 's@^\(.*\)/[^/]*$$@\1@'))
+	$(eval IMAGE_ARCH := $(shell echo $(SUBDIR) | sed 's@^.*/\([^/]*\)$$@\1@'))
 
 	@# Kernerls specific
 	$(eval KERNEL := $(shell echo "$(URI)" | sed 's@github.com/scaleway/kernel-tools/@@'))
@@ -110,6 +112,8 @@ info: _setenv
 	@echo reponame='$(REPONAME)'
 	@echo repourl='$(REPOURL)'
 	@echo subdir='$(SUBDIR)'
+	@echo image_subdir='$(IMAGE_SUBDIR)'
+	@echo image_arch='$(IMAGE_ARCH)'
 	@echo server='$(SERVER)'
 	@echo kernel='$(KERNEL)'
 

@@ -26,7 +26,7 @@ _prepare_images_setup_server: _setenv _docker_login _scw_login _prepare_images_s
 	@echo "[+] Fetching the image sources..."
 	scw exec $(SERVER) rm -rf "./$(REPONAME)"
 	scw exec $(SERVER) git clone --single-branch "https://$(REPOURL)"
-	scw exec $(SERVER) "cd "$(REPONAME)"; git log HEAD^..HEAD"
+	scw exec $(SERVER) "cd "$(REPONAME)"; git show --summary"
 
 
 .PHONY: _prepare_images_spawn_server
@@ -41,7 +41,7 @@ _prepare_images_spawn_server: _scw_login _sshkey
 .PHONY: build_images
 build_images: _setenv
 	@echo "[+] Building the image..."
-	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make build BUILD_OPTS="--pull"'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make build ARCH="$(IMAGE_ARCH)" BUILD_OPTS="--pull"'
 
 
 .PHONY: test_images
@@ -52,13 +52,13 @@ test_images: _setenv
 .PHONY: deploy_images
 deploy_images: _setenv
 	@echo "[+] Releasing image on docker hub..."
-	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make release'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" release'
 
 	@echo "[+] Publishing on store..."
-	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make publish_on_store_sftp STORE_USERNAME=$(STORE_USERNAME) STORE_HOSTNAME=$(STORE_HOSTNAME)'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" publish_on_store_sftp STORE_USERNAME=$(STORE_USERNAME) STORE_HOSTNAME=$(STORE_HOSTNAME)'
 
 	@echo "[+] Creating a scaleway image..."
-	scw exec $(SERVER) 'cd "$(REPONAME)/$(SUBDIR)"; make image_on_local'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_local'
 
 
 .PHONY: clean_images
