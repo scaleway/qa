@@ -5,7 +5,7 @@ prepare_kernels:
 
 .PHONY: build_kernels
 build_kernels: _setenv
-	cd kernel-tools; make KERNEL="$(KERNEL)" REVISION="$(REVISION)" build
+	cd kernel-tools; make KERNEL="$(KERNEL)" REVISION="$(REVISION)" build KBUILD_BUILD_USER=travis KBUILD_BUILD_HOST=scaleway-qa.pr-$(TRAVIS_PULL_REQUEST)
 
 
 .PHONY: test_kernels
