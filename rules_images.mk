@@ -41,6 +41,9 @@ _prepare_images_setup_server_local: _setenv _docker_login _netrc_login
 	docker version
 	docker info
 
+	@echo "[+] Writing up ~/.scwrc"
+	@scw login --organization="$(shell cat ~/.scwrc | jq .organization)" --token="$(shell cat ~/.scwrc | jq .token)" -s
+
 	@echo "[+] Fetching the image sources..."
 	rm -rf "./$(REPONAME)"
 	git clone --single-branch "https://$(REPOURL)"
