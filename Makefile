@@ -78,7 +78,7 @@ $(HOME)/.ssh/id_rsa:
 _setenv:
 	@mkdir -p .tmp
 	@#echo travis_pull_request='$(TRAVIS_PULL_REQUEST)' travis_commit='$(TRAVIS_COMMIT)' travis_tag='$(TRAVIS_TAG)' travis_branch='$(TRAVIS_BRANCH)'
-	@test `git diff --name-status master...HEAD | grep '/.build' | awk 'END{print NR}'` -eq 1 || (echo "Error: You need to have one and only one '.build' file at a time. Exiting..."; exit 1); \
+	@test `git diff --name-status master...HEAD | grep '/.build' | awk 'END{print NR}'` -eq 1 || (echo "Error: You need to have one and only one '.build' file at a time. Exiting..."; git diff --name-status master...HEAD | grep '/.build'; exit 1); \
 
 	$(eval CHANGES := $(shell git diff --name-status master...HEAD | grep '/.build' | awk '{ print $$2 }'))
 	$(eval TYPE := $(shell echo $(CHANGES) | cut -d/ -f1))
