@@ -9,8 +9,7 @@ _scw_login: $(HOME)/.scwrc
 $(HOME)/.scwrc:
 	@echo "Writing ~/.scwrc"
 	@if [ "$(TRAVIS_SCALEWAY_TOKEN)" -a "$(TRAVIS_SCALEWAY_ORGANIZATION)" ]; then \
-	  echo '{"api_endpoint":"https://api.scaleway.com/","account_endpoint":"https://account.scaleway.com/","organization":"$(TRAVIS_SCALEWAY_ORGANIZATION)","token":"$(TRAVIS_SCALEWAY_TOKEN)"}' > ~/.scwrc && \
-	  chmod 600 ~/.scwrc; \
+	  scw login --organization="$(TRAVIS_SCALEWAY_ORGANIZATION)" --token="$(TRAVIS_SCALEWAY_TOKEN)" -s; \
 	else \
 	  echo "Cannot login to 'scw', credentials are missing"; \
 	  exit 1; \
