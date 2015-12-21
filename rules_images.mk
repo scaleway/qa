@@ -37,12 +37,9 @@ _prepare_images_setup_server_scw: _setenv _docker_login _scw_login _prepare_imag
 	scw exec $(SERVER) "cd "$(REPONAME)"; git show --summary | cat"
 
 .PHONY: _prepare_images_setup_server_local
-_prepare_images_setup_server_local: _setenv _docker_login _netrc_login
+_prepare_images_setup_server_local: _setenv _docker_login _netrc_login _scw_login
 	docker version
 	docker info
-
-	@echo "[+] Writing up ~/.scwrc"
-	@scw login --organization="$(shell cat ~/.scwrc | jq .organization)" --token="$(shell cat ~/.scwrc | jq .token)" -s
 
 	@echo "[+] Fetching the image sources..."
 	rm -rf "./$(REPONAME)"
