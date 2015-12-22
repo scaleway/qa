@@ -73,13 +73,16 @@ $(HOME)/.dockercfg:
 _sshkey: $(HOME)/.ssh/id_rsa
 $(HOME)/.ssh/id_rsa:
 	@echo "Writing ~/.ssh/id_rsa"
-	@if [ -z "$(TRAVIS_SSH_PRIV_KEY)" ]; then \
-	  echo "[+] Generating an ssh key if needed..."; \
-	  test -f $@ || ssh-keygen -t rsa -f $@ -N ""; \
-	else \
-	  echo "[+] Writing ssh key from environment..."; \
-	  echo $(TRAVIS_SSH_PRIV_KEY) | tr "@" "\n" | tr "_" " " > $@; \
-	  chmod 600 $@; \
+	@if [ -z "$(TRAVIS_SSH_PRIV_KEY)" ]; then                        \
+	  echo "[+] Generating an ssh key if needed...";                 \
+	  test -f $@ || ssh-keygen -t rsa -f $@ -N "";                   \
+	else                                                             \
+	  echo "[+] Writing ssh key from environment...";                \
+	  echo $(TRAVIS_SSH_PRIV_KEY) | tr "@" "\n" | tr "_" " " > $@;   \
+	  chmod 600 $@;                                                  \
+	fi
+	if [ ! -f "~/.ssh/id_rsa.pub" ]; then                            \
+	  ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub;            \
 	fi
 
 
