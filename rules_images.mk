@@ -65,7 +65,7 @@ test_images: _setenv
 
 
 .PHONY: deploy_images
-deploy_images:
+deploy_images: _setenv
 	if [ "${IMAGE_ARCH}" = "armv7l" ]; then       \
 	  $(MAKE) deploy_images_scw;                  \
 	else                                          \
