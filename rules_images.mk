@@ -12,7 +12,7 @@ _prepare_images_setup_server: _setenv
 
 
 .PHONY: _prepare_images_setup_server_scw
-_prepare_images_setup_server_scw: _setenv _docker_login _scw_login _prepare_images_spawn_server _netrc_login _sshkey
+_prepare_images_setup_server_scw: _setenv _docker_login _scw_login _netrc_login _sshkey
 	@$(MAKE) clean_images
 
 	@echo "[+] Picking a builder..."
