@@ -10,8 +10,15 @@ _prepare_images_setup_server: _setenv
 	  $(MAKE) _prepare_images_setup_server_local;  \
 	fi
 
+
 .PHONY: _prepare_images_setup_server_scw
-_prepare_images_setup_server_scw: _setenv _docker_login _scw_login _prepare_images_spawn_server _netrc_login
+_prepare_images_setup_server_scw: _setenv _docker_login _scw_login _prepare_images_spawn_server _netrc_login _sshkey
+	@$(MAKE) clean_images
+
+	@echo "[+] Picking a builder..."
+	scw ps --filter=tags=permanent-builder -q | shuf | head -n1 > .tmp/server
+	@#scw run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder | tee .tmp/server
+
 	$(eval SERVER := $(shell test -f .tmp/server && cat .tmp/server || echo ""))
 	@echo "[+] Waiting for server to be available..."
 	scw exec -w -T=300 $(SERVER) uptime
@@ -36,8 +43,9 @@ _prepare_images_setup_server_scw: _setenv _docker_login _scw_login _prepare_imag
 	scw exec $(SERVER) git clone --single-branch "https://$(REPOURL)"
 	scw exec $(SERVER) "cd "$(REPONAME)"; git show --summary | cat"
 
+
 .PHONY: _prepare_images_setup_server_local
-_prepare_images_setup_server_local: _setenv _docker_login _netrc_login _scw_login
+_prepare_images_setup_server_local: _setenv _docker_login _netrc_login _scw_login _sshkey
 	docker version
 	docker info
 
@@ -45,15 +53,6 @@ _prepare_images_setup_server_local: _setenv _docker_login _netrc_login _scw_logi
 	rm -rf "./$(REPONAME)"
 	git clone --single-branch "https://$(REPOURL)"
 	cd "$(REPONAME)"; git show --summary | cat
-
-
-.PHONY: _prepare_images_spawn_server
-_prepare_images_spawn_server: _scw_login _sshkey
-	@$(MAKE) clean_images
-
-	@echo "[+] Picking a builder..."
-	scw ps --filter=tags=permanent-builder -q | shuf | head -n1 > .tmp/server
-	@#scw run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder | tee .tmp/server
 
 
 .PHONY: build_images
