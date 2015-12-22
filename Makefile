@@ -29,6 +29,15 @@ $(HOME)/.s3cfg:
 	  exit 1; \
 	fi
 
+.PHONY: _prepare_build_server
+_prepare_build_server:
+	@$(MAKE) clean_images
+
+	@echo "[+] Picking a builder..."
+	scw ps --filter=tags=permanent-builder -q | shuf | head -n1 > .tmp/server
+	@#scw run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder | tee .tmp/server
+
+
 .PHONY: _netrc_login
 _netrc_login: $(HOME)/.netrc
 $(HOME)/.netrc:

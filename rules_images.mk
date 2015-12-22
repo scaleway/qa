@@ -12,13 +12,7 @@ _prepare_images_setup_server: _setenv
 
 
 .PHONY: _prepare_images_setup_server_scw
-_prepare_images_setup_server_scw: _setenv _docker_login _scw_login _netrc_login _sshkey
-	@$(MAKE) clean_images
-
-	@echo "[+] Picking a builder..."
-	scw ps --filter=tags=permanent-builder -q | shuf | head -n1 > .tmp/server
-	@#scw run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder | tee .tmp/server
-
+_prepare_images_setup_server_scw: _setenv _docker_login _scw_login _netrc_login _sshkey _prepare_build_server
 	$(eval SERVER := $(shell test -f .tmp/server && cat .tmp/server || echo ""))
 	@echo "[+] Waiting for server to be available..."
 	scw exec -w -T=300 $(SERVER) uptime
