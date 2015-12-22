@@ -100,7 +100,7 @@ deploy_images_local: _setenv
 	cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" publish_on_store_sftp STORE_USERNAME=$(STORE_USERNAME) STORE_HOSTNAME=$(STORE_HOSTNAME)
 
 	@echo "[+] Creating a scaleway image..."
-	cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_store STORE_HOSTNAME=$(STORE_HOSTNAME) STORE_PATH=$(STORE_USERNAME)
+	cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_store STORE_HOSTNAME=$(STORE_HOSTNAME) STORE_PATH=$(STORE_USERNAME)/images
 
 
 .PHONY: clean_images
