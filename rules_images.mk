@@ -82,7 +82,7 @@ deploy_images_scw: _setenv
 	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" publish_on_store_sftp STORE_USERNAME=$(STORE_USERNAME) STORE_HOSTNAME=$(STORE_HOSTNAME)'
 
 	@echo "[+] Creating a scaleway image..."
-	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_local'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_local SCW_GATEWAY=$(SCW_GATEWAY_SERVER) SCW_GATEWAY_HTTP_PROXY=$(SCW_GATEWAY_HTTP_PROXY)'
 
 
 .PHONY: deploy_images_local
