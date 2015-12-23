@@ -7,6 +7,7 @@ prepare_initrds:
 build_initrds:
 	cd workspace/Linux; make build TARGET=armv7l
 	cd workspace/Linux; make build TARGET=x86_64
+	cd workspace/Linux; make build TARGET=arm64
 
 
 .PHONY: test_initrds
@@ -18,8 +19,10 @@ test_initrds:
 deploy_initrds: _s3cmd_login _netrc_login
 	cd workspace/Linux; make publish_on_s3 TARGET=armv7l
 	cd workspace/Linux; make publish_on_s3 TARGET=x86_64
+	cd workspace/Linux; make publish_on_s3 TARGET=arm64
 	cd workspace/Linux; make publish_on_store_sftp TARGET=armv7l
 	cd workspace/Linux; make publish_on_store_sftp TARGET=x86_64
+	cd workspace/Linux; make publish_on_store_sftp TARGET=arm64
 
 
 .PHONY: clean_initrds
