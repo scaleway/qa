@@ -102,7 +102,7 @@ _setenv:
 
 	@# Images specific
 	$(eval SERVER := $(shell test -f .tmp/server && cat .tmp/server || echo ""))
-	$(eval IMAGE_SUBDIR := $(shell echo $(SUBDIR) | sed 's@^\(.*\)/[^/]*$$@\1@'))
+	$(eval IMAGE_SUBDIR := $(shell echo /$(SUBDIR) | sed 's@^\(.*\)/[^/]*$$@\1@;s/^\///'))
 	$(eval IMAGE_ARCH := $(shell echo $(SUBDIR) | sed 's@^.*/\([^/]*\)$$@\1@'))
 
 	@# Kernerls specific
