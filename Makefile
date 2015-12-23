@@ -9,8 +9,7 @@ _scw_login: $(HOME)/.scwrc
 $(HOME)/.scwrc:
 	@echo "Writing ~/.scwrc"
 	@if [ "$(TRAVIS_SCALEWAY_TOKEN)" -a "$(TRAVIS_SCALEWAY_ORGANIZATION)" ]; then \
-	  echo '{"api_endpoint":"https://api.scaleway.com/","account_endpoint":"https://account.scaleway.com/","organization":"$(TRAVIS_SCALEWAY_ORGANIZATION)","token":"$(TRAVIS_SCALEWAY_TOKEN)"}' > ~/.scwrc && \
-	  chmod 600 ~/.scwrc; \
+	  scw login --organization="$(TRAVIS_SCALEWAY_ORGANIZATION)" --token="$(TRAVIS_SCALEWAY_TOKEN)" -s; \
 	else \
 	  echo "Cannot login to 'scw', credentials are missing"; \
 	  exit 1; \
@@ -29,6 +28,15 @@ $(HOME)/.s3cfg:
 	  echo "Cannot login to 's3cmd', credentials are missing"; \
 	  exit 1; \
 	fi
+
+.PHONY: _prepare_build_server
+_prepare_build_server:
+	@$(MAKE) clean_images
+
+	@echo "[+] Picking a builder..."
+	scw ps --filter=tags=permanent-builder -q | shuf | head -n1 > .tmp/server
+	@#scw run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder | tee .tmp/server
+
 
 .PHONY: _netrc_login
 _netrc_login: $(HOME)/.netrc
@@ -65,13 +73,16 @@ $(HOME)/.dockercfg:
 _sshkey: $(HOME)/.ssh/id_rsa
 $(HOME)/.ssh/id_rsa:
 	@echo "Writing ~/.ssh/id_rsa"
-	@if [ -z "$(TRAVIS_SSH_PRIV_KEY)" ]; then \
-	  echo "[+] Generating an ssh key if needed..."; \
-	  test -f $@ || ssh-keygen -t rsa -f $@ -N ""; \
-	else \
-	  echo "[+] Writing ssh key from environment..."; \
-	  echo $(TRAVIS_SSH_PRIV_KEY) | tr "@" "\n" | tr "_" " " > $@; \
-	  chmod 600 $@; \
+	@if [ -z "$(TRAVIS_SSH_PRIV_KEY)" ]; then                        \
+	  echo "[+] Generating an ssh key if needed...";                 \
+	  test -f $@ || ssh-keygen -t rsa -f $@ -N "";                   \
+	else                                                             \
+	  echo "[+] Writing ssh key from environment...";                \
+	  echo $(TRAVIS_SSH_PRIV_KEY) | tr "@" "\n" | tr "_" " " > $@;   \
+	  chmod 600 $@;                                                  \
+	fi
+	if [ ! -f "~/.ssh/id_rsa.pub" ]; then                            \
+	  ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub;            \
 	fi
 
 
@@ -79,7 +90,7 @@ $(HOME)/.ssh/id_rsa:
 _setenv:
 	@mkdir -p .tmp
 	@#echo travis_pull_request='$(TRAVIS_PULL_REQUEST)' travis_commit='$(TRAVIS_COMMIT)' travis_tag='$(TRAVIS_TAG)' travis_branch='$(TRAVIS_BRANCH)'
-	@test `git diff --name-status master...HEAD | grep '/.build' | awk 'END{print NR}'` -eq 1 || (echo "Error: You need to have one and only one '.build' file at a time. Exiting..."; exit 1); \
+	@test `git diff --name-status master...HEAD | grep '/.build' | awk 'END{print NR}'` -eq 1 || (echo "Error: You need to have one and only one '.build' file at a time. Exiting..."; git diff --name-status master...HEAD | grep '/.build'; exit 1); \
 
 	$(eval CHANGES := $(shell git diff --name-status master...HEAD | grep '/.build' | awk '{ print $$2 }'))
 	$(eval TYPE := $(shell echo $(CHANGES) | cut -d/ -f1))

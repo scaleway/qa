@@ -3,7 +3,16 @@ prepare_images: _prepare_images_setup_server
 
 
 .PHONY: _prepare_images_setup_server
-_prepare_images_setup_server: _setenv _docker_login _scw_login _prepare_images_spawn_server _netrc_login
+_prepare_images_setup_server: _setenv
+	if [ "${IMAGE_ARCH}" = "armv7l" ]; then        \
+	  $(MAKE) _prepare_images_setup_server_scw;    \
+	else                                           \
+	  $(MAKE) _prepare_images_setup_server_local;  \
+	fi
+
+
+.PHONY: _prepare_images_setup_server_scw
+_prepare_images_setup_server_scw: _setenv _docker_login _scw_login _netrc_login _sshkey _prepare_build_server
 	$(eval SERVER := $(shell test -f .tmp/server && cat .tmp/server || echo ""))
 	@echo "[+] Waiting for server to be available..."
 	scw exec -w -T=300 $(SERVER) uptime
@@ -26,22 +35,28 @@ _prepare_images_setup_server: _setenv _docker_login _scw_login _prepare_images_s
 	@echo "[+] Fetching the image sources..."
 	scw exec $(SERVER) rm -rf "./$(REPONAME)"
 	scw exec $(SERVER) git clone --single-branch "https://$(REPOURL)"
-	scw exec $(SERVER) "cd "$(REPONAME)"; git show --summary"
+	scw exec $(SERVER) "cd "$(REPONAME)"; git show --summary | cat"
 
 
-.PHONY: _prepare_images_spawn_server
-_prepare_images_spawn_server: _scw_login _sshkey
-	@$(MAKE) clean_images
+.PHONY: _prepare_images_setup_server_local
+_prepare_images_setup_server_local: _setenv _docker_login _netrc_login _scw_login _sshkey
+	docker version
+	docker info
 
-	@echo "[+] Picking a builder..."
-	scw ps --filter=tags=permanent-builder -q | shuf | head -n1 > .tmp/server
-	@#scw run -d --tmp-ssh-key --name=qa-image-builder --env="image=$(REPONAME)" image-builder | tee .tmp/server
+	@echo "[+] Fetching the image sources..."
+	rm -rf "./$(REPONAME)"
+	git clone --single-branch "https://$(REPOURL)"
+	cd "$(REPONAME)"; git show --summary | cat
 
 
 .PHONY: build_images
 build_images: _setenv
 	@echo "[+] Building the image..."
-	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make build ARCH="$(IMAGE_ARCH)" BUILD_OPTS="--pull"'
+	if [ "${IMAGE_ARCH}" = "armv7l" ]; then \
+	  scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make build ARCH="$(IMAGE_ARCH)" BUILD_OPTS="--pull"'; \
+	else \
+	  cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make build ARCH="$(IMAGE_ARCH)" BUILD_OPTS="--pull"; \
+	fi
 
 
 .PHONY: test_images
@@ -51,6 +66,15 @@ test_images: _setenv
 
 .PHONY: deploy_images
 deploy_images: _setenv
+	if [ "${IMAGE_ARCH}" = "armv7l" ]; then       \
+	  $(MAKE) deploy_images_scw;                  \
+	else                                          \
+	  $(MAKE) deploy_images_local;                \
+	fi
+
+
+.PHONY: deploy_images_scw
+deploy_images_scw: _setenv
 	@echo "[+] Releasing image on docker hub..."
 	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" release'
 
@@ -58,7 +82,19 @@ deploy_images: _setenv
 	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" publish_on_store_sftp STORE_USERNAME=$(STORE_USERNAME) STORE_HOSTNAME=$(STORE_HOSTNAME)'
 
 	@echo "[+] Creating a scaleway image..."
-	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_local'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_local SCW_GATEWAY=$(SCW_GATEWAY_SERVER) SCW_GATEWAY_HTTP_PROXY=$(SCW_GATEWAY_HTTP_PROXY)'
+
+
+.PHONY: deploy_images_local
+deploy_images_local: _setenv
+	@echo "[+] Releasing image on docker hub..."
+	cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" release
+
+	@echo "[+] Publishing on store..."
+	cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" publish_on_store_sftp STORE_USERNAME=$(STORE_USERNAME) STORE_HOSTNAME=$(STORE_HOSTNAME)
+
+	@echo "[+] Creating a scaleway image..."
+	cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_store STORE_HOSTNAME=$(STORE_HOSTNAME) STORE_PATH=$(STORE_USERNAME)/images
 
 
 .PHONY: clean_images
