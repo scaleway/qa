@@ -21,7 +21,7 @@ script:
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make build || exit 1;   fi
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then make test || exit 1;    fi
 after_success:
-- if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then travis_retry sudo make deploy || exit 1;  fi
+- if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then travis_retry make deploy || exit 1;  fi
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then travis_retry make clean;   fi
 after_failure:
 - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then travis_retry make clean;   fi
