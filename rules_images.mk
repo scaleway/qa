@@ -36,7 +36,7 @@ _prepare_images_setup_server_scw: _setenv _docker_login _scw_login _netrc_login 
 	scw exec $(SERVER) rm -rf "./$(REPONAME)"
 	scw exec $(SERVER) git clone --single-branch "https://$(REPOURL)"
 	scw exec $(SERVER) "cd "$(REPONAME)"; git show --summary | cat"
-	scw exec $(SERVER) "cd "$(REPONAME)"; make fclean"
+	scw exec $(SERVER) "cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make fclean"
 
 
 .PHONY: _prepare_images_setup_server_local
