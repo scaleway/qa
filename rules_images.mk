@@ -76,6 +76,9 @@ deploy_images: _setenv
 
 .PHONY: deploy_images_scw
 deploy_images_scw: _setenv
+	@echo "[+] Refreshing bootscript cache..."
+	scw exec $(SERVER) 'scw images -a'
+
 	@echo "[+] Releasing image on docker hub..."
 	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" release'
 
