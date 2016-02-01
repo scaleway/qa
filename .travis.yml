@@ -10,7 +10,7 @@ cache:
 
 install:
 - sudo apt-get update && sudo apt-get install -y -qq u-boot-tools s3cmd lftp jq
-- travis_retry wget https://github.com/scaleway/scaleway-cli/releases/download/v1.7.0-rc1/scw_1.7.0-rc1_amd64.deb
+- travis_retry wget https://github.com/scaleway/scaleway-cli/releases/download/v1.7.1/scw_1.7.1_amd64.deb
   && sudo dpkg -i scw*.deb && rm -f scw*.deb && scw version
 - travis_retry wget https://github.com/moul/anonuuid/releases/download/v1.0.0/anonuuid_1.0_amd64.deb
   && sudo dpkg -i anonuuid*.deb && rm -f anonuuid*.deb && anonuuid --version
