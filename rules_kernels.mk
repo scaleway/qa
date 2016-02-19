@@ -15,6 +15,7 @@ test_kernels:
 
 .PHONY: deploy_kernels
 deploy_kernels: _s3cmd_login _netrc_login _setenv
+	sudo chown -R travis kernel-tools/dist
 	cd kernel-tools; make KERNEL="$(KERNEL)" REVISION="$(REVISION)" publish_on_store_sftp
 	cd kernel-tools; make KERNEL="$(KERNEL)" REVISION="$(REVISION)" publish_on_s3
 
