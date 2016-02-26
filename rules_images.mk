@@ -80,7 +80,10 @@ deploy_images_scw: _setenv
 	scw exec $(SERVER) 'scw images -a'
 
 	@echo "[+] Releasing image on docker hub..."
-	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" release'
+	while :; do echo -n .; sleep 60; done & \
+	  trap "kill $!" EXIT; \
+	  scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" release'; \
+	  kill $$! && trap " " EXIT
 
 	@echo "[+] Publishing on store..."
 	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" publish_on_store_sftp STORE_USERNAME=$(STORE_USERNAME) STORE_HOSTNAME=$(STORE_HOSTNAME)'
