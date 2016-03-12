@@ -27,8 +27,9 @@ next_id=$(echo "$latest+1" | bc)
 branch_name=build-image-$user-$repo_clean-$tag-$next_id
 mkdir -p $next_id
 touch $next_id/.build
+git branch -D $branch_name
 git checkout -b $branch_name
 git add $next_id/.build
 git commit $next_id/.build -m "Trigger build of $docker_name rev$next_id :gun:"
-git push -u origin $branch_name
+git push $PUSH_OPTS -u origin $branch_name
 git checkout master
