@@ -1,3 +1,6 @@
+WRITER_COMMERCIAL_TYPE ?=	VC1
+
+
 .PHONY: prepare_images
 prepare_images: _prepare_images_setup_server
 
@@ -89,7 +92,7 @@ deploy_images_scw: _setenv
 	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" publish_on_store_sftp STORE_USERNAME=$(STORE_USERNAME) STORE_HOSTNAME=$(STORE_HOSTNAME)'
 
 	@echo "[+] Creating a scaleway image..."
-	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_local SCW_GATEWAY=$(SCW_GATEWAY_SERVER) SCW_GATEWAY_HTTP_PROXY=$(SCW_GATEWAY_HTTP_PROXY)'
+	scw exec $(SERVER) 'cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_local SCW_COMMERCIAL_TYPE=$(WRITER_COMMERCIAL_TYPE) SCW_GATEWAY=$(SCW_GATEWAY_SERVER) SCW_GATEWAY_HTTP_PROXY=$(SCW_GATEWAY_HTTP_PROXY)'
 
 
 .PHONY: deploy_images_local
@@ -104,7 +107,7 @@ deploy_images_local: _setenv
 	cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" publish_on_store_sftp STORE_USERNAME=$(STORE_USERNAME) STORE_HOSTNAME=$(STORE_HOSTNAME)
 
 	@echo "[+] Creating a scaleway image..."
-	cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_store STORE_HOSTNAME=$(STORE_HOSTNAME) STORE_PATH=$(STORE_USERNAME)/images
+	cd "$(REPONAME)/$(IMAGE_SUBDIR)"; make ARCH="$(IMAGE_ARCH)" image_on_store SCW_COMMERCIAL_TYPE=$(WRITER_COMMERCIAL_TYPE) STORE_HOSTNAME=$(STORE_HOSTNAME) STORE_PATH=$(STORE_USERNAME)/images
 
 
 .PHONY: clean_images
