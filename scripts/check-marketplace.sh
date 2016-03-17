@@ -1,5 +1,7 @@
 #!/bin/bash
 
+scw _flush-cache
+
 while read image; do
     echo "Testing ${image}..."
     for commercial_type in C1 VC1; do
