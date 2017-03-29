@@ -1,9 +1,9 @@
 #!/bin/sh
 
+cd `dirname $0`/..
 
 # user input
 image=$1
-
 
 # variables
 set -x

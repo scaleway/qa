@@ -1,5 +1,6 @@
 #!/bin/sh
 
+cd `dirname $0`/..
 
 # user input
 kernel=$1
