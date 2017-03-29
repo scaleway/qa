@@ -1,5 +1,6 @@
 #!/bin/sh
 
+cd `dirname $0`/..
 
 # user input
 initrd=${1:-github.com/scaleway/initrd}
