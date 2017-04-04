@@ -17,7 +17,7 @@ repo=$(echo $initrd | cut -d/ -f3)
 
 # create build request on the repo
 mkdir -p initrds/$initrd
-pushd initrds/$initrd
+cd initrds/$initrd
 git clean -fxd .
 latest=$(ls | sort -n | tail -n 1)
 latest=${latest:-0}
