@@ -18,7 +18,7 @@ tag=$(echo $subdir | tr / -)
 
 # create build request on the repo
 mkdir -p kernels/$kernel
-pushd kernels/$kernel
+cd kernels/$kernel
 git clean -fxd .
 latest=$(ls | sort -n | tail -n 1)
 latest=${latest:-0}

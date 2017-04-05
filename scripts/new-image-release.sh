@@ -19,7 +19,7 @@ docker_name=$user/$repo_clean:$tag
 
 # create build request on the repo
 mkdir -p images/$image
-pushd images/$image
+cd images/$image
 git clean -fxd .
 latest=$(ls | sort -n | tail -n 1)
 latest=${latest:-0}
